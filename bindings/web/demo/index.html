@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>docx-tree demo</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 860px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    #bar {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #status {
+      color: #666;
+    }
+
+    #out {
+      border: 1px solid #ddd;
+      padding: 24px 32px;
+      border-radius: 8px;
+      min-height: 60px;
+    }
+
+    pre#json {
+      background: #f6f6f6;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      overflow: auto;
+      max-height: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>docx-tree demo</h2>
+  <div id="bar">
+    <input type="file" id="file" accept=".docx">
+    <span id="status">loading sample.docx…</span>
+  </div>
+  <div id="out"></div>
+  <details>
+    <summary>DocTree JSON</summary>
+    <pre id="json"></pre>
+  </details>
+  <script type="module">
+    import { DocxTreeParser, renderToDOM, renderToHTML, DOCX_CSS } from "../dist/index.js";
+
+    const style = document.createElement("style");
+    style.textContent = DOCX_CSS;
+    document.head.appendChild(style);
+
+    const status = document.getElementById("status");
+    const out = document.getElementById("out");
+    // worker 在 dist/ 下；wasm 用绝对 URL，避免 worker 内相对解析歧义
+    const parser = new DocxTreeParser(
+      "../dist/docx_worker.js",
+      new URL("docx_tree_wasm.wasm", location.href).href,
+    );
+
+    async function renderDocx(buffer, label) {
+      const t0 = performance.now();
+      const tree = await parser.parse(buffer);
+      const t1 = performance.now();
+      const root = await renderToDOM(tree, { fetchImage: (t) => parser.entry(t) });
+      const t2 = performance.now();
+      status.textContent = `${label}: parse ${Math.round(t1 - t0)}ms, render ${Math.round(t2 - t1)}ms`;
+      out.replaceChildren(root);
+      document.getElementById("json").textContent = JSON.stringify(tree, null, 1);
+    }
+
+    document.getElementById("file").addEventListener("change", async (ev) => {
+      const f = ev.target.files[0];
+      if (f) {
+        status.textContent = `parsing ${f.name}…`;
+        try {
+          await renderDocx(await f.arrayBuffer(), f.name);
+        } catch (e) {
+          status.textContent = `错误: ${e.message}`;
+        }
+      }
+    });
+
+    // 自动加载样本
+    try {
+      const resp = await fetch("sample.docx");
+      if (!resp.ok) throw new Error(`sample.docx HTTP ${resp.status}`);
+      await renderDocx(await resp.arrayBuffer(), "sample.docx");
+    } catch (e) {
+      status.textContent = `sample.docx 加载失败: ${e.message}（可用上方选择文件）`;
+    }
+  </script>
+</body>
+
+</html>

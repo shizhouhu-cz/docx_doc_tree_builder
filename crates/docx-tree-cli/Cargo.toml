@@ -1,0 +1,12 @@
+[package]
+name = "docx-tree-cli"
+version.workspace = true
+edition.workspace = true
+description = "原生调试 CLI：docx -> stdout JSON / entry 提取（不进 wasm 产物）"
+
+[[bin]]
+name = "docx-tree"
+path = "src/main.rs"
+
+[dependencies]
+docx-tree-core = { path = "../docx-tree-core" }

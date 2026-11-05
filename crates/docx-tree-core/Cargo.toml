@@ -1,0 +1,13 @@
+[package]
+name = "docx-tree-core"
+version.workspace = true
+edition.workspace = true
+description = "极小体积 docx -> DocumentTree 解析核心库（纯 Rust，无 wasm 依赖）"
+
+[dependencies]
+miniz_oxide = { workspace = true }
+quick-xml = { workspace = true }
+
+[dev-dependencies]
+# 测试构造 deflate 样本用
+miniz_oxide = { workspace = true }

@@ -1,0 +1,11 @@
+[package]
+name = "docx-tree-wasm"
+version.workspace = true
+edition.workspace = true
+description = "docx-tree 的 wasm32-unknown-unknown 裸 FFI 绑定层"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+docx-tree-core = { path = "../docx-tree-core" }

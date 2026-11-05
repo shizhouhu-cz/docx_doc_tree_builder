@@ -1,0 +1,23 @@
+{
+  "name": "docx-tree-web",
+  "version": "0.1.0",
+  "description": "docx → DocTree WASM 解析库的 Web 绑定：手写 TS 胶水 + Worker + 渲染层",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:min": "esbuild src/index.ts src/docx_worker.ts --bundle --minify --format=esm --platform=browser --outdir=dist-min"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.0"
+  }
+}
